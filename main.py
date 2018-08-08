@@ -10,9 +10,9 @@ special_list = ['具体签约时间', '本年收入贡献（万元）', '本年�
                 '产业互联网项目类型', '政企部统计签约行业', '备注', '项目编号', '总部部门', '签约部门', \
                 '服务收入（万元）']
 
-month = ['1月', '2月', '3月', '4月', '5月', '6月']
+month = ['1月', '2月', '3月', '4月', '5月', '6月', '7月']
 
-correct = {'月份': ['1月', '2月', '3月', '4月', '5月', '6月', np.NaN], \
+correct = {'月份': ['1月', '2月', '3月', '4月', '5月', '6月', '7月', np.NaN], \
            '新签/变更': ['新签', '变更', np.NaN], \
            '项目来源（内部/外部）': ['内部', '外部', np.NaN], \
            '行业属性（下拉可选）': ['政务', '国防军事', '环保', '金融', '医疗', '教育', \
@@ -47,13 +47,19 @@ def is_nan(string):
 def is_repeat(string):
     line_num = [index + 2 + file_sign for index,each in enumerate(f.duplicated(string,keep = False)) if each]
     if line_num != []:
-        print('错误！：',string,': 第',line_num,'行为重复值！请核实！')
+        print('警告！：',string,': 第',line_num,'行为重复值！请核实并修改！')
 
 #子函数is_correct：检查数据有效性
 def is_correct(string):
     line_num = [index + 2 + file_sign for index,each in enumerate(f[string]) if each not in correct[string]]
     if line_num != []:
         print('错误！：',string,': 第',line_num,'内容填写错误！')
+
+#子函数overcount:检查数字是否超过万元
+def overcount(string):
+    line_num = [index + 2 + file_sign for index,each in enumerate(f[string]) if each >= 20000]
+    if line_num != []:
+        print('警告！：',string,': 第',line_num,'金额非（万元）单位！请核实修改！')
 
 #子函数is_right：检查内容是否为空、格式是否正确
 def is_right(string):
@@ -90,6 +96,8 @@ def is_right(string):
             f[string].astype(np.float64)
         except ValueError:
             print('错误！：',string,'：填写的内容有非数字！请核实！')
+
+        overcount(string)
 
         
     #检查毛利
@@ -167,3 +175,5 @@ if __name__ == '__main__':
         if each not in special_list and each.find('Unname') == -1:
             print('------------', each, '-----------')
             is_right(each)
+
+    print('烦请核实并修改！')
